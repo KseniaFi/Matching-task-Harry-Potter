@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Exercise 1 — Match the phrases</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      background: #f9f9f9; 
+      margin: 20px 15px 40px; 
+      color: #222; 
+      min-height: 100vh; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+    }
+    h2 { 
+      text-align: center; 
+      margin-bottom: 15px; 
+      line-height: 1.2; 
+      font-weight: 700;
+      max-width: 900px;
+    }
+    .instructions {
+      text-align: center; 
+      font-style: italic; 
+      margin-bottom: 22px; 
+      max-width: 900px;
+      font-size: 1rem;
+      color: #444;
+      user-select:none;
+    }
+    .container { 
+      display: flex; 
+      gap: 30px; 
+      justify-content: center; 
+      flex-wrap: wrap; 
+      max-width: 900px;
+      width: 100%;
+    }
+    .column { 
+      flex: 1 1 400px; 
+      background: #fff; 
+      padding: 20px 24px;
+      border-radius: 10px; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      user-select:none;
+      min-width: 320px;
+    }
+    .column h3 { 
+      text-align: center; 
+      margin-bottom: 18px; 
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+    ul { 
+      list-style-type: none; 
+      padding: 0; 
+      margin: 0; 
+      max-height: 460px; 
+      overflow-y: auto;
+      scrollbar-width: thin; /* Firefox */
+    }
+    ul::-webkit-scrollbar {
+      width: 8px;
+    }
+    ul::-webkit-scrollbar-thumb {
+      background: #ccc; 
+      border-radius: 4px;
+    }
+    li.phrase, li.definition {
+      background: #e4e7ea; 
+      margin: 8px 0; 
+      padding: 12px 18px; 
+      border-radius: 7px; 
+      cursor: pointer; 
+      transition: background 0.25s ease;
+      font-size: 1rem;
+      line-height: 1.3;
+      border: 2px solid transparent;
+      outline-offset: 2px;
+    }
+    li.phrase:hover:not(.removed), li.definition:hover:not(.removed) {
+      background: #d0d8e4;
+      border-color: #007acc;
+    }
+    li.selected {
+      background: #c5def5;
+      font-weight: 700;
+      border-color: #005fa3;
+    }
+    li.removed {
+      /* optionally hide removed items */
+      display: none;
+    }
+    #pairs {
+      max-width: 900px; 
+      margin: 28px auto 12px; 
+      padding: 16px 22px; 
+      background: #fff; 
+      border-radius: 10px; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      user-select:none;
+    }
+    #pairs h3 {
+      margin-bottom: 14px; 
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.3rem;
+    }
+    #pairs ul {
+      max-height: 280px; 
+      overflow-y: auto;
+      padding: 0; 
+      margin: 0; 
+      list-style: none;
+    }
+    #pairs li {
+      margin: 7px 0; 
+      padding: 12px 18px; 
+      border-radius: 7px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.07);
+      font-size: 1rem;
+      line-height: 1.3;
+    }
+    #pairs li.correct {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1.5px solid #c3e6cb;
+    }
+    #pairs li.incorrect {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1.5px solid #f5c6cb;
+      flex-wrap: wrap;
+    }
+    #pairs li.incorrect > .phrase {
+      font-weight: 700;
+      margin-right: 12px;
+      flex: 1 1 30%;
+      color: #721c24;
+      white-space: nowrap;
+    }
+    #pairs li.incorrect > .user-def {
+      flex: 1 1 45%;
+      font-style: italic;
+      color: #721c24;
+      margin-right: 14px;
+      word-break: break-word;
+    }
+    #pairs li.incorrect > .correct-def {
+      flex: 1 1 45%;
+      color: #155724;
+      font-weight: 700;
+      border-left: 3px solid #155724;
+      padding-left: 10px;
+      word-break: break-word;
+    }
+    #check-btn {
+      display: block; 
+      margin: 22px auto 18px; 
+      padding: 13px 28px; 
+      font-size: 17px; 
+      border: none;
+      border-radius: 8px; 
+      background: #007acc; 
+      color: white; 
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-weight: 700;
+      min-width: 140px;
+      user-select:none;
+    }
+    #check-btn:disabled { 
+      background: #a4c1dc; 
+      cursor: not-allowed; 
+    }
+    #result {
+      max-width: 900px;
+      margin: 12px auto 0;
+      text-align: center;
+      font-size: 1.25em;
+      font-weight: 700;
+      color: #155724;
+      min-height: 1.5em;
+      white-space: pre-line;
+      user-select:none;
+    }
+    /* Responsive tweaks */
+    @media (max-width: 720px) {
+      .container {
+        flex-direction: column;
+        align-items: center;
+      }
+      .column {
+        flex: none;
+        width: 100%;
+        max-width: 600px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h2>Exercise 1<br>Match each phrase from Column A to its definition from Column B.</h2>
+<p class="instructions">
+  Выберите сначала фразу из Колонки A, затем подходящее определение из Колонки B.<br>
+  После выбора пары они исчезнут из списков, чтобы не запутаться.<br>
+  Когда сопоставите все пары, нажмите кнопку "Проверить", чтобы увидеть результаты.
+</p>
+
+<div class="container" role="main" aria-label="Matching exercise">
+  <section class="column" id="columnA" aria-label="Phrases column">
+    <h3>Column A</h3>
+    <ul id="phrases-list" tabindex="0" aria-live="polite" aria-relevant="additions removals">
+      <li class="phrase" data-key="O" tabindex="0">showcase the tension between self-interest and duty</li>
+      <li class="phrase" data-key="K" tabindex="0">reflect compassion and pragmatism</li>
+      <li class="phrase" data-key="L" tabindex="0">have a profound sense of responsibility</li>
+      <li class="phrase" data-key="E" tabindex="0">embody intellectual rigor and conscientiousness</li>
+      <li class="phrase" data-key="A" tabindex="0">cultivate a deep empathy</li>
+      <li class="phrase" data-key="D" tabindex="0">be insecure</li>
+      <li class="phrase" data-key="M" tabindex="0">experience emotional ambivalence</li>
+      <li class="phrase" data-key="I" tabindex="0">value love and forgiveness</li>
+      <li class="phrase" data-key="B" tabindex="0">maintain loyalty to someone</li>
+      <li class="phrase" data-key="F" tabindex="0">struggle with insecurity and self-doubt</li>
+      <li class="phrase" data-key="N" tabindex="0">embody emotional sincerity</li>
+      <li class="phrase" data-key="G" tabindex="0">demonstrate prudence</li>
+      <li class="phrase" data-key="C" tabindex="0">exhibit a mix of vulnerability and determination</li>
+      <li class="phrase" data-key="H" tabindex="0">experience internal conflict</li>
+      <li class="phrase" data-key="J" tabindex="0">show emotional growth and develop maturity over time</li>
+    </ul>
+  </section>
+  <section class="column" id="columnB" aria-label="Definitions column">
+    <h3>Column B</h3>
+    <ul id="definitions-list" tabindex="0" aria-live="polite" aria-relevant="additions removals">
+      <li class="definition" data-key="L" tabindex="0">To deeply feel and acknowledge a strong duty or obligation to act carefully and reliably;</li>
+      <li class="definition" data-key="O" tabindex="0">To clearly display or highlight the conflict or struggle between acting for one’s own benefit and fulfilling one’s moral or social obligations;</li>
+      <li class="definition" data-key="M" tabindex="0">To go through mixed or contradictory emotions about someone or something at the same time;</li>
+      <li class="definition" data-key="D" tabindex="0">To feel uncertain, anxious, or lacking confidence in oneself or one’s abilities;</li>
+      <li class="definition" data-key="J" tabindex="0">To demonstrate improvement in understanding and managing emotions, becoming more emotionally mature over time;</li>
+      <li class="definition" data-key="H" tabindex="0">To go through a mental or emotional struggle caused by having opposing thoughts or feelings within oneself;</li>
+      <li class="definition" data-key="K" tabindex="0">To show kindness and practical, realistic thinking in actions or decisions;</li>
+      <li class="definition" data-key="I" tabindex="0">To regard love and forgiveness as important and to hold them in high esteem;</li>
+      <li class="definition" data-key="G" tabindex="0">To show careful judgment and wise decision-making, especially to avoid risks or mistakes;</li>
+      <li class="definition" data-key="E" tabindex="0">To represent or express qualities of strict intellectual discipline and responsible attention to duties;</li>
+      <li class="definition" data-key="A" tabindex="0">To develop or nurture a strong ability to understand and share the feelings of others;</li>
+      <li class="definition" data-key="F" tabindex="0">To have trouble coping with feelings of not being good enough and lacking self-assurance;</li>
+      <li class="definition" data-key="N" tabindex="0">To genuinely express honest and heartfelt emotions;</li>
+      <li class="definition" data-key="B" tabindex="0">To continue to be faithful, supportive, and devoted to a person over time;</li>
+      <li class="definition" data-key="C" tabindex="0">To show or display a combination of openness to emotional sensitivity and firmness of purpose;</li>
+    </ul>
+  </section>
+</div>
+
+<div id="pairs" aria-live="polite" aria-atomic="true" role="region">
+  <h3>Selected pairs:</h3>
+  <ul id="selected-pairs" aria-label="Selected phrase-definition pairs">
+    <!-- Добавленные пары будут здесь -->
+  </ul>
+</div>
+
+<button id="check-btn" disabled aria-disabled="true" aria-controls="result selected-pairs">Проверить</button>
+<div id="result" role="alert" aria-live="assertive"></div>
+
+<script>
+  (() => {
+    const phrasesList = document.getElementById('phrases-list');
+    const definitionsList = document.getElementById('definitions-list');
+    const selectedPairsList = document.getElementById('selected-pairs');
+    const checkBtn = document.getElementById('check-btn');
+    const resultDiv = document.getElementById('result');
+
+    let selectedPhrase = null;
+    let selectedDef = null;
+    let chosenPairs = [];
+
+    // Количество пар (чтобы не хардкодить по умолчанию)
+    const totalPairs = phrasesList.children.length;
+
+    function updateCheckButton() {
+      if (chosenPairs.length === totalPairs) {
+        checkBtn.disabled = false;
+        checkBtn.setAttribute('aria-disabled', 'false');
+        resultDiv.textContent = 'Все пары выбраны! Нажмите "Проверить", чтобы увидеть результат.';
+        resultDiv.style.color = 'green';
+      } else {
+        checkBtn.disabled = true;
+        checkBtn.setAttribute('aria-disabled', 'true');
+        resultDiv.textContent = `Выбрано пар: ${chosenPairs.length} из ${totalPairs}. Продолжайте выбор...`;
+        resultDiv.style.color = '#444';
+      }
+    }
+
+    function clearSelections() {
+      if (selectedPhrase) selectedPhrase.classList.remove('selected');
+      if (selectedDef) selectedDef.classList.remove('selected');
+      selectedPhrase = null;
+      selectedDef = null;
+    }
+
+    function addChosenPair(key, phrase, definition) {
+      const li = document.createElement('li');
+      li.textContent = `${phrase} — ${definition}`;
+      selectedPairsList.appendChild(li);
+    }
+
+    function attemptPair() {
+      if (!selectedPhrase || !selectedDef) return;
+
+      const key = selectedPhrase.dataset.key;
+      const phraseText = selectedPhrase.textContent.trim();
+      const defText = selectedDef.textContent.trim();
+
+      chosenPairs.push({ key, phraseText, defText });
+
+      // Убираем пары из списков
+      selectedPhrase.classList.add('removed');
+      selectedDef.classList.add('removed');
+
+      // Или можно удалить из DOM:
+      // phrasesList.removeChild(selectedPhrase);
+      // definitionsList.removeChild(selectedDef);
+
+      addChosenPair(key, phraseText, defText);
+      clearSelections();
+      updateCheckButton();
+    }
+
+    phrasesList.addEventListener('click', e => {
+      if (!e.target.classList.contains('phrase') || e.target.classList.contains('removed')) return;
+      if (selectedPhrase) selectedPhrase.classList.remove('selected');
+      selectedPhrase = e.target;
+      selectedPhrase.classList.add('selected');
+      if (selectedDef) attemptPair();
+    });
+
+    definitionsList.addEventListener('click', e => {
+      if (!e.target.classList.contains('definition') || e.target.classList.contains('removed')) return;
+      if (selectedDef) selectedDef.classList.remove('selected');
+      selectedDef = e.target;
+      selectedDef.classList.add('selected');
+      if (selectedPhrase) attemptPair();
+    });
+
+    const correctDefinitions = {
+      "To deeply feel and acknowledge a strong duty or obligation to act carefully and reliably;": "L",
+      "To clearly display or highlight the conflict or struggle between acting for one’s own benefit and fulfilling one’s moral or social obligations;": "O",
+      "To go through mixed or contradictory emotions about someone or something at the same time;": "M",
+      "To feel uncertain, anxious, or lacking confidence in oneself or one’s abilities;": "D",
+      "To demonstrate improvement in understanding and managing emotions, becoming more emotionally mature over time;": "J",
+      "To go through a mental or emotional struggle caused by having opposing thoughts or feelings within oneself;": "H",
+      "To show kindness and practical, realistic thinking in actions or decisions;": "K",
+      "To regard love and forgiveness as important and to hold them in high esteem;": "I",
+      "To show careful judgment and wise decision-making, especially to avoid risks or mistakes;": "G",
+      "To represent or express qualities of strict intellectual discipline and responsible attention to duties;": "E",
+      "To develop or nurture a strong ability to understand and share the feelings of others;": "A",
+      "To have trouble coping with feelings of not being good enough and lacking self-assurance;": "F",
+      "To genuinely express honest and heartfelt emotions;": "N",
+      "To continue to be faithful, supportive, and devoted to a person over time;": "B",
+      "To show or display a combination of openness to emotional sensitivity and firmness of purpose;": "C"
+    };
+
+    const answersByKey = {
+      A: "To develop or nurture a strong ability to understand and share the feelings of others;",
+      B: "To continue to be faithful, supportive, and devoted to a person over time;",
+      C: "To show or display a combination of openness to emotional sensitivity and firmness of purpose;",
+      D: "To feel uncertain, anxious, or lacking confidence in oneself or one’s abilities;",
+      E: "To represent or express qualities of strict intellectual discipline and responsible attention to duties;",
+      F: "To have trouble coping with feelings of not being good enough and lacking self-assurance;",
+      G: "To show careful judgment and wise decision-making, especially to avoid risks or mistakes;",
+      H: "To go through a mental or emotional struggle caused by having opposing thoughts or feelings within oneself;",
+      I: "To regard love and forgiveness as important and to hold them in high esteem;",
+      J: "To demonstrate improvement in understanding and managing emotions, becoming more emotionally mature over time;",
+      K: "To show kindness and practical, realistic thinking in actions or decisions;",
+      L: "To deeply feel and acknowledge a strong duty or obligation to act carefully and reliably;",
+      M: "To go through mixed or contradictory emotions about someone or something at the same time;",
+      N: "To genuinely express honest and heartfelt emotions;",
+      O: "To clearly display or highlight the conflict or struggle between acting for one’s own benefit and fulfilling one’s moral or social obligations;"
+    };
+
+    checkBtn.addEventListener('click', () => {
+      selectedPairsList.innerHTML = '';  // очистим и заново покажем результат
+
+      let correctCount = 0;
+
+      chosenPairs.forEach(pair => {
+        const correctDef = answersByKey[pair.key];
+        const li = document.createElement('li');
+
+        if (pair.defText === correctDef) {
+          li.classList.add('correct');
+          li.textContent = `${pair.phraseText} — ${correctDef}`;
+          correctCount++;
+        } else {
+          li.classList.add('incorrect');
+          li.innerHTML = `<span class="phrase">${pair.phraseText}</span>
+                          <span class="user-def">Ваш ответ: ${pair.defText}</span>
+                          <span class="correct-def">Правильно: ${correctDef}</span>`;
+        }
+
+        selectedPairsList.appendChild(li);
+      });
+
+      if (correctCount === chosenPairs.length) {
+        resultDiv.textContent = `Поздравляем! Все пары выбраны правильно. ✔️`;
+        resultDiv.style.color = '#155724';
+      } else {
+        resultDiv.textContent = `Правильных пар: ${correctCount} из ${chosenPairs.length}. Исправьте неправильные при повторном прохождении.`;
+        resultDiv.style.color = '#b02a37';
+      }
+
+      checkBtn.disabled = true;
+      checkBtn.setAttribute('aria-disabled', 'true');
+    });
+
+    updateCheckButton();
+  })();
+</script>
+
+</body>
+</html>
